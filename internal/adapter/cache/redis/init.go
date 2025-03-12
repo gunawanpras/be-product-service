@@ -19,7 +19,7 @@ func NewRedisCacheClient(attr InitAttribute) Cache {
 
 func (init InitAttribute) validate() error {
 	if !init.Client.validate() {
-		return fmt.Errorf("missing mq client : %+v", init.Client)
+		return fmt.Errorf("missing redis client : %+v", init.Client)
 	}
 
 	return nil

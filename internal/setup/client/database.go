@@ -12,7 +12,7 @@ import (
 func InitPostgres(conf *config.Config) *sqlx.DB {
 	pg, err := sqlx.Connect("postgres", conf.Postgre.Primary.ConnString)
 	if err != nil {
-		log.Panic("failed to open postgre client for project-mq service:", err)
+		log.Panic("failed to open postgre client for product service:", err)
 	}
 
 	if err := pg.Ping(); err != nil {
