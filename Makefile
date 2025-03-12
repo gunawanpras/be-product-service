@@ -1,0 +1,28 @@
+.PHONY: all db_migrate db_seed
+
+POSTGRESQL_URL=$(shell awk -F ': ' '/migrateConnString:/ {sub(/migrateConnString: /, "", $$0); print $$0}' config.yaml)
+
+all: clean init db_migrate db_seed bin/main
+
+clean:
+	@docker-compose down --volumes
+
+init:
+	@go mod tidy
+	@docker-compose up --build --no-start && docker-compose start
+	@echo "Wait for database to be ready..."
+	@sleep 10
+
+db_migrate:
+	@echo "Migrating database..."	
+	@echo "y" | migrate -database ${POSTGRESQL_URL} -path database/postgres/migrations down
+	@migrate -database ${POSTGRESQL_URL} -path database/postgres/migrations up
+
+db_seed:
+	@echo "Seeding database..."	
+	@echo "y" | migrate -database ${POSTGRESQL_URL} -path database/postgres/seeds down
+	@migrate -database ${POSTGRESQL_URL} -path database/postgres/seeds up
+
+bin/main: cmd/main.go
+	@echo "Building binary..."
+	@go build -o $@ $<

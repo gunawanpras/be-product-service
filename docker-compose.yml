@@ -1,0 +1,39 @@
+services:
+  app:
+    container_name: product-be-service
+    build: .
+    ports:
+      - "8080:1010"    
+    depends_on:
+      database:
+        condition: service_healthy
+  redis:
+    image: redis:6.2.7-bullseye
+    container_name: product-redis-6
+    ports:
+      - "6380:6379"
+  database:
+    platform: linux/x86_64
+    image: postgres:14.1-alpine
+    container_name: product-pg-14
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: database
+    ports:
+      - 54320:5432    
+    volumes:
+      - db:/var/lib/postgresql/data      
+      # If you want to reload new database schema, you need to execute
+      # `docker-compose down --volumes` first to remove the volume.
+      
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+volumes:  
+  db:
+    driver: local
