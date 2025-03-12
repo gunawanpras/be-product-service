@@ -1,0 +1,21 @@
+server:
+    name: "be-product-service"
+    host: "0.0.0.0"
+    port: 1010
+postgre:
+    primary:
+        connString: "postgres://postgres:postgres@product-pg-14:5432/database?sslmode=disable"
+        migrateConnString: "postgres://postgres:postgres@127.0.0.1:54320/database?sslmode=disable"
+        maxOpenConn: 350
+        maxIdleConn: 10
+        maxConnLifeTimeInSecond: 10
+redis:
+    primary:
+        host: product-redis-6
+        port: 6379
+        password: 123456
+        db: 0
+        ttl: 30
+        dial_timeout: 15
+        read_timeout: 15
+        write_timeout: 15
