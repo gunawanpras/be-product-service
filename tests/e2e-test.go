@@ -65,6 +65,7 @@ func (c *APIClient) GetProductByID(ctx context.Context, productID string) (int, 
 	return c.doRequest(req)
 }
 
+// SearchAProductByName sends a GET request to the /products?product_name=kangkung endpoint.
 func (c *APIClient) SearchAProductByName(ctx context.Context) (int, []byte, error) {
 	url := fmt.Sprintf("%s/products?product_name=kangkung", c.BaseURL)
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
@@ -74,6 +75,7 @@ func (c *APIClient) SearchAProductByName(ctx context.Context) (int, []byte, erro
 	return c.doRequest(req)
 }
 
+// SearchAProductByNameAndFilterByCategoryType sends a GET request to the /products?product_name=kangkung&category_type=Sayuran endpoint.
 func (c *APIClient) SearchAProductByNameAndFilterByCategoryType(ctx context.Context) (int, []byte, error) {
 	url := fmt.Sprintf("%s/products?product_name=kangkung&category_type=Sayuran", c.BaseURL)
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
@@ -83,6 +85,7 @@ func (c *APIClient) SearchAProductByNameAndFilterByCategoryType(ctx context.Cont
 	return c.doRequest(req)
 }
 
+// GetProductsAndFilteredByCategoryType sends a GET request to the /products?category_type=Sayuran endpoint.
 func (c *APIClient) GetProductsAndFilteredByCategoryType(ctx context.Context) (int, []byte, error) {
 	url := fmt.Sprintf("%s/products?category_type=Sayuran", c.BaseURL)
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
@@ -92,6 +95,7 @@ func (c *APIClient) GetProductsAndFilteredByCategoryType(ctx context.Context) (i
 	return c.doRequest(req)
 }
 
+// GetProductsAndSortedByNameAsc sends a GET request to the /products?sort=name&directive=asc endpoint.
 func (c *APIClient) GetProductsAndSortedByNameAsc(ctx context.Context) (int, []byte, error) {
 	url := fmt.Sprintf("%s/products?sort=name&directive=asc", c.BaseURL)
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
@@ -101,6 +105,7 @@ func (c *APIClient) GetProductsAndSortedByNameAsc(ctx context.Context) (int, []b
 	return c.doRequest(req)
 }
 
+// GetProductsAndSortedByBasePriceDesc sends a GET request to the /products?sort=base_price&directive=desc endpoint.
 func (c *APIClient) GetProductsAndSortedByBasePriceDesc(ctx context.Context) (int, []byte, error) {
 	url := fmt.Sprintf("%s/products?sort=base_price&directive=desc", c.BaseURL)
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
@@ -110,9 +115,9 @@ func (c *APIClient) GetProductsAndSortedByBasePriceDesc(ctx context.Context) (in
 	return c.doRequest(req)
 }
 
-// PostProduct sends a POST request to create a new product.
+// CreateProduct sends a POST request to create a new product.
 // The productPayload is expected to be a map representing the JSON payload.
-func (c *APIClient) PostProduct(ctx context.Context, productPayload map[string]any) (int, []byte, error) {
+func (c *APIClient) CreateProduct(ctx context.Context, productPayload map[string]any) (int, []byte, error) {
 	payloadBytes, err := json.Marshal(productPayload)
 	if err != nil {
 		return 0, nil, err
@@ -127,12 +132,7 @@ func (c *APIClient) PostProduct(ctx context.Context, productPayload map[string]a
 	return c.doRequest(req)
 }
 
-func main() {
-	client := newAPIClient(baseURL)
-	// Create a context with timeout for all API calls.
-	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
-	defer cancel()
-
+func execCreateProductTest(ctx context.Context, client *APIClient) {
 	productPayload := []map[string]any{
 		{
 			"name":        "Kangkung Potong 1",
@@ -156,64 +156,90 @@ func main() {
 
 	fmt.Printf("1) POST /products\n")
 	for _, payload := range productPayload {
-		status, _, err := client.PostProduct(ctx, payload)
+		status, _, err := client.CreateProduct(ctx, payload)
 		if err != nil {
-			log.Fatalf("error in PostProduct: %v", err)
+			log.Fatalf("error in CreateProduct: %v", err)
 		}
 		fmt.Printf("  - Create product '%s' - Status: %d\n", payload["name"], status)
 	}
+}
 
-	// Get all products
+func execGetAllProductsTest(ctx context.Context, client *APIClient) {
 	status, _, err := client.GetProducts(ctx)
 	if err != nil {
 		log.Fatalf("Error in GetProducts: %v", err)
 	}
 	fmt.Printf("2) GET /products - Status: %d\n", status)
+}
 
-	// Get product by ID
+func execGetProductByIDTest(ctx context.Context, client *APIClient) {
 	sampleID := "00000000-0000-0000-0000-000000000031"
-	status, _, err = client.GetProductByID(ctx, sampleID)
+	status, _, err := client.GetProductByID(ctx, sampleID)
 	if err != nil {
 		log.Fatalf("Error in GetProductByID: %v", err)
 	}
 	fmt.Printf("3) GET /products/%s - Status: %d\n", sampleID, status)
+}
 
-	// Search a product by Name
+func execSearchProductByNameTest(ctx context.Context, client *APIClient) {
 	productName := "kangkung"
-	categoryType := "Sayuran"
 	searchQuery := fmt.Sprintf("?product_name=%s", productName)
 
-	status, _, err = client.SearchAProductByName(ctx)
+	status, _, err := client.SearchAProductByName(ctx)
 	if err != nil {
 		log.Fatalf("Error in SearchAProductByName: %v", err)
 	}
 	fmt.Printf("4) GET /products%s - Status: %d\n", searchQuery, status)
+}
 
-	// Search a product by Name and Filtered by Category Type
-	searchQuery = fmt.Sprintf("?product_name=%s&category_type=%s", productName, categoryType)
-	status, _, err = client.SearchAProductByNameAndFilterByCategoryType(ctx)
+func execSearchProductByCategoryAndProductNameTest(ctx context.Context, client *APIClient) {
+	productName := "kangkung"
+	categoryType := "Sayuran"
+
+	searchQuery := fmt.Sprintf("?product_name=%s&category_type=%s", productName, categoryType)
+	status, _, err := client.SearchAProductByNameAndFilterByCategoryType(ctx)
 	if err != nil {
 		log.Fatalf("Error in SearchAProductByNameAndFilterByCategoryType: %v", err)
 	}
 	fmt.Printf("5) GET /products%s - Status: %d\n", searchQuery, status)
+}
 
-	// Get all Products Sort By Name
+func execGetAllProductsAndSortedByNameAscTest(ctx context.Context, client *APIClient) {
 	sort := "name"
 	directive := "asc"
-	searchQuery = fmt.Sprintf("?sort=%s&directive=%s", sort, directive)
-	status, _, err = client.GetProductsAndSortedByNameAsc(ctx)
+	searchQuery := fmt.Sprintf("?sort=%s&directive=%s", sort, directive)
+
+	status, _, err := client.GetProductsAndSortedByNameAsc(ctx)
 	if err != nil {
 		log.Fatalf("Error in GetProductsAndSortedByNameAsc: %v", err)
 	}
 	fmt.Printf("6) GET /products%s - Status: %d\n", searchQuery, status)
+}
 
-	// Get all Products Sort By Name
-	sort = "base_price"
-	directive = "desc"
-	searchQuery = fmt.Sprintf("?sort=%s&directive=%s", sort, directive)
-	status, _, err = client.GetProductsAndSortedByBasePriceDesc(ctx)
+func execGetAllProductsAndSortedByBasePriceDescTest(ctx context.Context, client *APIClient) {
+	sort := "base_price"
+	directive := "desc"
+	searchQuery := fmt.Sprintf("?sort=%s&directive=%s", sort, directive)
+
+	status, _, err := client.GetProductsAndSortedByBasePriceDesc(ctx)
 	if err != nil {
 		log.Fatalf("Error in GetProductsAndSortedByBasePriceDesc: %v", err)
 	}
 	fmt.Printf("7) GET /products%s - Status: %d\n\n", searchQuery, status)
+}
+
+func main() {
+	client := newAPIClient(baseURL)
+	// Create a context with timeout for all API calls.
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	// Run tests
+	execCreateProductTest(ctx, client)
+	execGetAllProductsTest(ctx, client)
+	execGetProductByIDTest(ctx, client)
+	execSearchProductByNameTest(ctx, client)
+	execSearchProductByCategoryAndProductNameTest(ctx, client)
+	execGetAllProductsAndSortedByNameAscTest(ctx, client)
+	execGetAllProductsAndSortedByBasePriceDescTest(ctx, client)
 }
