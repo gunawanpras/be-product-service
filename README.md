@@ -1,5 +1,12 @@
 # be-product-service
 
+## Features
+**Cache**: This project uses Redis to store frequently accessed data, reducing the load on the database and improving overall performance. Both SQL queries and responses are cached to minimize latency.
+
+**Unit Tests**: The project includes a set of unit tests to ensure the handlers, services and repositories are functioning properly. This helps catch bugs and regressions early in the development cycle.
+
+**End-to-End (E2E) Tests**: The project also includes E2E tests that simulate real-world scenarios, verifying that the entire application works seamlessly from start to finish.
+
 ## Requirements
 
 To run this project you need to have the following installed:
