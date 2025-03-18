@@ -1,23 +1,27 @@
 package postgres
 
-import "github.com/jmoiron/sqlx"
+import (
+	"github.com/jmoiron/sqlx"
+)
 
-type ProductRepository struct {
-	db        DB
-	statement StatementList
-}
+type (
+	ProductRepository struct {
+		db        DB
+		statement StatementList
+	}
 
-type DB struct {
-	Db *sqlx.DB
-}
+	DB struct {
+		Db *sqlx.DB
+	}
 
-type StatementList struct {
-	CreateProduct    *sqlx.Stmt
-	ListProduct      *sqlx.Stmt
-	GetProductByID   *sqlx.Stmt
-	GetProductByName *sqlx.Stmt
-}
+	StatementList struct {
+		CreateProduct    *sqlx.Stmt
+		ListProduct      *sqlx.Stmt
+		GetProductByID   *sqlx.Stmt
+		GetProductByName *sqlx.Stmt
+	}
 
-type InitAttribute struct {
-	DB DB
-}
+	InitAttribute struct {
+		DB DB
+	}
+)
