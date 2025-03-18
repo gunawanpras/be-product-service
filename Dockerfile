@@ -10,14 +10,14 @@ COPY . .
 COPY config.yaml /config.yaml
 
 # Build our binary at root location.
-RUN GOPATH= go build -o /main cmd/main.go
+RUN GOPATH= go build -o /bin/main cmd/main.go
 
 ####################################################################
 # This is the actual image that we will be using in production.
 FROM alpine:latest
 
 # We need to copy the binary from the build image to the production image.
-COPY --from=Build /main .
+COPY --from=Build /bin/main /bin
 
 # Copy the config file
 COPY --from=Build /config.yaml .
@@ -26,4 +26,4 @@ COPY --from=Build /config.yaml .
 EXPOSE 1010
 
 # This is the command that will be executed when the container is started.
-ENTRYPOINT ["./main"]
+ENTRYPOINT ["./bin/main"]
